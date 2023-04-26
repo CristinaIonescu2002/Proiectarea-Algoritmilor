@@ -1,0 +1,8 @@
+./badgpt.cpp:16:  Missing space before {  [whitespace/braces] [5]
+Done processing ./badgpt.cpp
+Done processing ./feribot.cpp
+Done processing ./nostory.cpp
+Done processing ./semnale.cpp
+Done processing ./sushi.cpp
+Done processing ./_utils/verif.cpp
+Total errors found: 1

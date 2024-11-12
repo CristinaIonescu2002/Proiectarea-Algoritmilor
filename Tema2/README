@@ -1,0 +1,154 @@
+## Tema 2 Proiectarea Algoritmilor
+### Ionescu Cristina 323CC
+
+
+### Probleme:
+1. [Supercomputer](#supercomputer)
+2. [Cai ferate](#cai-ferate)
+3. [Teleportare](#teleportare)
+4. [Magazin](#magazin)
+
+#### *Supercomputer*
+- in primul rand am facut o sortare topologica si am umplut vectorii:
+    - topsort1 cu toate elementele cate au task 1
+    - topsort2 cu toate elementele cate au task 2
+- avem un vector parinti care retine gradul intern al nodurilor
+- o coada care ne va ajuta mai in colo
+- un vector [modif] care va retine daca s-a facut o modificare la pasul
+curent (daca parintele vreunui nod a fost adaugat sau nu)
+
+- apoi, toata ideea a fost:
+    - parcurgem in acelasi timp topsort1 si topsort2
+    - incercam sa calculam varianta de context swith atat pentru cand
+    se incepe cu 1, cat si pentru cand se incepe cu 2 in acelasi timp
+    - avem t1 = am gasit un nod care trebuie adaugat si are task 1
+    - si t2 = am gasit un nod care trebuie adaugat si are task 2
+    - avem grija ca in ambele cazuri sa nu depasim dimensiunea
+    vectorilor
+    - pentru nodurile cu 1:
+        - daca are gradul intern 0 sau -1 (nodul a ajuns la 0 in urma
+        adaugarii unui parinte de task 1 si nu va afecta ordinea de 1
+        si 2 daca il adaugam acum), punem t1 = 1
+        - ii luam la rand copii directi ii adaugam intr-o coada
+        si le scadem 1 in vectorul de parinti (parinteele lor a fost
+        adaugat)
+        - tot copiilor le mai setam modif[copil] = 1 (ca sa stim ca
+        aici a fost facuta o modificare)
+        - daca parinti[node] a ajuns la 0 in urma adaugarii parintelui
+        la pasul curent, trecem parinti[node] = -1 ca sa nu ne incurce
+        mai in colo
+    - pentru nodurile cu 2:
+        - daca are gradul intern 0 sau -2 (nodul a fost modificat de un
+        nod parinte adaugat de aici, independent de nodurile adaugate
+        la 1)
+        - la gasirea unui parinte valid, ii retinem copii directi in
+        coada, scadem parintele si
+        - daca a ajuns parinte[node] = 0 dar a fost modificat de un nod
+        adaugat de la 1, va trece la -1 (pentru a nu putea sa il adaugam
+        la pasul asta)
+        - daca a ajuns pe 0 si nu a fost modificat de 1, va ajunge pe -2
+        pentru a putea sa il adaugam la pasul asta
+    - trecem prin toate elementele de coada si punem parintii pe 0 si 
+    modificarea pe 0, daca au ajuns pe 0 la pasii de mai sus
+    - dupa toti acesti pasi, verificam t1 si t2:
+        - daca suntem la primul pas trebuie sa avem grija ca intr-o
+        parte vrem sa incepem cu 1 si in cealalta cu 2 (daca este 
+        posibil)
+        - vom retine ultimul task de la pasul anterior in urm si urm2
+        - de fiecare data incercam sa crestem contorul daca:
+            - avem t1 = 1 si t2 = 2
+            - sau daca s-a schimbat valoarea de la un pas la altul
+    - la final verificam daca a mai ramas ceva in vectori care va
+    schimba rezultatul
+
+    - in coada retinem toate nodurile modificate pentru a le schimba
+    modif pe 0 (dureaza mai putin decat daca as zeroiza vectorul)
+
+    *Complexitate* - O(n*m + lungime_maxima(topsort1 sau 
+                                        topsort2)*nr_maxim_copii_per _nod)
+
+#### *Cai ferate*
+
+- implementarea pentru tarjan a fost luata de aici:
+https://www.geeksforgeeks.org/tarjan-algorithm-find-strongly-connected-components/
+
+- ideea de la care am plecat este:
+- daca nodul sau sirul de noduri intoarse de Tarjan (practic
+componente tari 
+conexe) per total au gradul intern 0 => trebuie sa adaugam o
+muchie
+- trebuie sa avem grija ca nodul sursa sa nu apara printre ele
+
+- imi fac un vector care contine gradele interne
+- la finalul SCC-ului (unde se afiseaza rezultatul de obicei)
+verifig gradul intern
+al rezultatului partial oferit
+- daca are grad intern 0 si nodul sursa nu este printre
+noduri => ct++
+- la final afisez contorul (cate noduri trebuie adaugate)
+
+    *Complexitate* - O(V+E) in principiu
+
+#### *Teleportare*
+
+- implementarea pentru Dijkstra a fost luata de aici:
+https://www.tutorialspoint.com/Dijkstra-s-Algorithm-for-Adjacency-List-Representation
+
+- pur si simplu am luat algoritmul de mai sus si am incercat sa
+il schimb pentru problema data
+- la nodurile grafului am adaugat si notiunea de timp
+- la crearea grafului avem doua moduri:
+    1. muchia este normala (nu are mod de teleportare rapid)
+        - costul va fi timpul de parcurgere a notului
+        - timpul va fi 0
+    2. este muchie rapida
+        - costul va fi 1
+        - timupul va fi "timpul muchiei" (numita de ex t) -> timpul
+        la care se va afla parcurgerea trebuie sa fie % t == 0 pentru
+        ca nodul sa aiba cost 1, altfel va avea costul t
+- apoi apicam dijkstra
+- acum voi incerca sa explic in ce mod am schimbat algoritmul
+(sincera sa fiu imi amintesc partial, deoarece ideea mi-a venit intr-o
+ora tarzie in noapte )
+
+- pe langa vectorul normal de distante (clasic Dijkstra - dist), mai
+avem o lista de vectori care va contine toate variatele de cost ale
+drumurilor(dist2) + o lista de vectori pentru timpi care va contine tipii
+curenti ai parcurgerii de la fiecare
+cost de drum din dist2 (timpi)
+- avem grija ca atunci cand avem o muchie de teleportade sa vedem daca
+poate avea
+costul 1 sau nu, daca nu il poate avea incercam sa nu o alegem
+- alegem o muchie de teleportare cu costul maxim (t) doar daca nu avem
+alta posibilitate
+- am in cod si o varianta cand un timp din [timpi] este -1, este o
+posibilitate in care drumul respectiv nu a reusit sa ajunga in punctul dorit
+- la final vom lua drumul minim din dist2[nod_dorit] care nu are timpul -1,
+pe scrist alegem minimul din drumurile care au reusit sa ajunga in punctul
+dorit
+
+- dupa ceva timp mi-am dat seama ca nuu este cea mai buna aordare pentru ca
+pot fi si cazuri in care trebuie sa parcurgem drumuri de mai multe ori pentru
+a ajunge unde trebuie
+- toata varianta mea de implementare peste putin ciudata, recunosc, nu gandeam
+extrem de limpede cand am facut-o
+
+    *Complexitate* - O(m*logn) sau O(|E| * log|V|)
+
+
+#### *Magazin*
+
+- am un vectori "copii" care imi va retine cati copii are fiecare nod
+- prima data va contine doar gradele externe ale fiecarui nod
+- apoi cand se va face dfs-ul va fi updatat ca sa contina exact cati copii are
+fiecare nod
+- cand alcatuim raspunsul verificam:
+    - daca nu are destui copii ca sa trimita pachetele => -1
+    - daca nodul de la care se pleaca este sursa (adica 1) => DFS[nr pachete]
+    - daca este alt caz => cautam nodul in dfs, apoi trimitem numele nodului de
+    pe pozitia DFS[poz_nod + nr_pachete]
+
+    *Complexitate* - O(n*m + m*max_iter)
+    - unde max iter este pozitia maxima la care trebuie sa ne ducem daca nodul
+    poate trimite pachetele, dar trebuie sa ii gasim pozitia in vectorul de 
+    DFS pentru a stii ce carui nod ii revine pachetul respectiv
